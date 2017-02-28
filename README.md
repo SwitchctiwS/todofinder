@@ -1,8 +1,5 @@
 #todofinder
-##Description
-This will find all the different TODO's in a file and output every TODO to stdout. 
-If there is a file named 'TODO.txt', then it will output that file's contents as well.
-It will recurse into all folders if recursive option is specified.
+Recurses in folder and finds all the different TODO's in a file and outputs every TODO to stdout. If there is a file named 'TODO.txt' in the folder, then it will output that file's contents as well. 
 
 ##Operation
 Put HTML-like TODO flags around code, bullet points, etc.
@@ -20,9 +17,9 @@ or
 
 ##Todo
 (heh)
-<ol>
+<ul>
 <li>CLI with arg module</li>
 <li>Recurse ability</li>
 <li>Output TODO.txt</li>
-</ol>
+</ul>
 
