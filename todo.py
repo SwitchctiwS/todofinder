@@ -1,95 +1,143 @@
 """
+Title: Todofinder
+
+Author: Jared Thibault
+Date: 27 February 2017
+
 Program description:
     This will find all the different TODO's in a file and output every TODO to stdout.
-    If there is a file named 'TODO', then it will output that file's contents as well.
+    If there is a file named 'TODO.txt', then it will output that file's contents as well.
     It will recurse into all folders if recursive option is specified.
 
-Possible operation:
+Operation:
+    Put HTML-like TODO flags around code, bullet points, etc.
+
+    Example:
     <TODO>
-        [...]
+    [...]    and    <TODO>[...]</TODO>
     </TODO>
-
-    ALSO (maybe)
-
-    <TODO>[...]</TODO>
 """
 
-# <TODO>
-#import argparse
+"""
+<TODO>
+- comment code
+- figure this out:
+    import argparse
 
-# figure this out:
-#parse = argparse.ArgumentParser(description='Finds all TODO\'s in
-# 		a folder and outputs them to stdout')
-#parse.add_argument('')
-# </TODO>
+    parse = argparse.ArgumentParser(description='Finds all TODO\'s in
+            a folder and outputs them to stdout')
+    parse.add_argument('')
+</TODO>
+"""
+
+START_TODO_DELIM = '<TODO>'
+STOP_TODO_DELIM = '</TODO>'
+SPACE_TAB = '    '
+INDENT_1 = '    '
+INDENT_2 = '      '
 
 def todofinder(filename):
     """Finds TODOs in file"""
 
-    start_todo_delim = '<TODO>'
-    stop_todo_delim = '</TODO>'
-
+    print(filename)
     with open(filename, 'r') as file:
-        line_num = 1
-        for line in file:
-            line_num += 1
-        cols = len(str(line_num))
+        text = file.read()
 
-        file.seek(0)
+    if text.count(START_TODO_DELIM) != text.count(STOP_TODO_DELIM):
+        print(INDENT_1 + '!!! ERROR !!! TODOs don\'t match!')
+        print()
+        return
 
-        print(filename)
-        line_num = 1
-        todo_num = 0
-        in_todo = False
-        for line in file:
-            if start_todo_delim in line and stop_todo_delim in line:
-                todo_num += 1
+    line_num = 1
+    for line in text.splitlines():
+        line_num += 1
+    cols = len(str(line_num))
 
-                start = line.find(start_todo_delim) + len(start_todo_delim)
-                stop = line.find(stop_todo_delim)
+    line_num = 1
+    todo_num = 0
+    in_todo = False
+    for line in text.splitlines():
+        line = line.expandtabs(tabsize=len(SPACE_TAB))
 
-                print('  TODO{0}'.format(todo_num))
+        if START_TODO_DELIM in line and STOP_TODO_DELIM in line:
+            todo_num += 1
+
+            start = line.find(START_TODO_DELIM) + len(START_TODO_DELIM)
+            stop = line.find(STOP_TODO_DELIM)
+
+            print(INDENT_1 + 'TODO{0}'.format(todo_num))
+            print_line_nums(cols, line_num)
+            print(line[start:stop])
+            print(INDENT_1 + 'END{0}'.format(todo_num))
+            print()
+
+        elif START_TODO_DELIM in line:
+            todo_num += 1
+            in_todo = True
+
+            initial_tabs = count_tabs(line)
+
+            start = line.find(START_TODO_DELIM) + len(START_TODO_DELIM)
+            stop = len(line)
+
+            print(INDENT_1 + 'TODO{0}'.format(todo_num))
+            if start != stop:
                 print_line_nums(cols, line_num)
-                print_todo(line, start, stop)
-                print('  END{0}'.format(todo_num))
-                print()
+                print(line[start:stop])
 
-            elif start_todo_delim in line:
-                todo_num += 1
-                in_todo = True
+        elif STOP_TODO_DELIM in line:
+            in_todo = False
 
-                start = line.find(start_todo_delim) + len(start_todo_delim)
-                stop = len(line) - 1
-
-                print('  TODO{0}'.format(todo_num))
-                if start != stop:
-                    print_line_nums(cols, line_num)
-                    print_todo(line, start, stop)
-
-            elif stop_todo_delim in line:
-                in_todo = False
-
-                start = 0
-                stop = line.find(stop_todo_delim)
-
-                if start != stop:
-                    print_line_nums(cols, line_num)
-                    print_todo(line, start, stop)
-                print('  END{0}'.format(todo_num))
-                print()
-
+            line_tabs = count_tabs(line)
+            if line_tabs > initial_tabs:
+                start = initial_tabs * len(SPACE_TAB)
+            elif line_tabs < initial_tabs:
+                start = line_tabs * len(SPACE_TAB)
             else:
-                if in_todo:
-                    print_line_nums(cols, line_num)
-                    print_todo(line, 0, len(line) - 1)
+                start = initial_tabs * len(SPACE_TAB)
 
-            line_num += 1
+            stop = line.find(STOP_TODO_DELIM)
 
-def print_todo(line, start, stop):
-    """Prints line inbetween start and stop"""
-    for i in range(start, stop):
-        print(line[i], end='')
-    print()
+            if start != stop:
+                print_line_nums(cols, line_num)
+                print(line[start:stop])
+            print(INDENT_1 + 'END{0}'.format(todo_num))
+            print()
+
+        else:
+            if in_todo:
+                line_tabs = count_tabs(line)
+                if line_tabs > initial_tabs:
+                    start = initial_tabs * len(SPACE_TAB)
+                elif line_tabs < initial_tabs:
+                    start = line_tabs * len(SPACE_TAB)
+                else:
+                    start = initial_tabs * len(SPACE_TAB)
+
+                stop = len(line)
+
+                print_line_nums(cols, line_num)
+                print(line[start:stop])
+
+        line_num += 1
+
+def count_tabs(line):
+    """Counts the amount of leading tab-spaces in a string"""
+
+    if line.startswith(SPACE_TAB):
+        start = 0
+        end = 0
+
+        while line[end] == ' ':
+            end += 1
+        end += 1
+
+        count = line.count(SPACE_TAB, start, end)
+
+    else:
+        count = 0
+
+    return count
 
 def print_line_nums(cols, line_num):
     """
@@ -97,11 +145,12 @@ def print_line_nums(cols, line_num):
     There is a constant amount of columns printed.
     """
 
-    print('    ', end='')
+    print(INDENT_2, end='')
     for _ in range(cols - len(str(line_num))):
         print('0', end='')
     print('{0} '.format(line_num), end='')
 
-
 todofinder('./testfile')
-todofinder('./testtt')
+todofinder('./testfile2')
+todofinder('./testfile3')
+todofinder('./testfile4')
