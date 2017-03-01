@@ -1,4 +1,27 @@
 """
+MIT License
+
+Copyright (c) 2017 Jared Thibault
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
 Title: Todofinder
 
 Author: Jared Thibault
@@ -61,6 +84,9 @@ def todofinder(filename):
         print()
         return
 
+    # Convert all tabs to spaces
+    text = text.expandtabs(tabsize=len(SPACE_TAB))
+
     # Counts line numbers and finds out how many
     # columns the line number takes up
     line_num = 1
@@ -74,9 +100,6 @@ def todofinder(filename):
     todo_num = 0
     in_todo = False
     for line in text.splitlines():
-        # Convert all tabs to spaces
-        line = line.expandtabs(tabsize=len(SPACE_TAB))
-
         # Inline TODO
         if START_TODO_DELIM in line and STOP_TODO_DELIM in line:
             todo_num += 1
