@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
+
+
 Title: Todofinder
 
 Author: Jared Thibault
@@ -36,70 +38,123 @@ Operation:
     Put HTML-like TODO flags around code, bullet points, etc.
 
     Example:
-    <TODO>
-    [...]
-    </TODO>
-    or
-    <TODO>[...]</TODO>
+        <TODO>
+        [...]
+        </TODO>
+        or
+        <TODO>[...]</TODO>
 """
+
+#Imports:
+import argparse # For CLI arguments
+import os # For file/directory operations
+
+# Defines:
+VERSION = '1.0.0' # [major].[minor].[patch]
+
+START_TODO_DELIM = '<TODO>' # Start-todo delimiter
+STOP_TODO_DELIM = '</TODO>' # Stop-todo delimiter
+SPACE_TAB = '    ' # 1 tab = 4 spaces
+INDENT_1 = '    ' # 4 spaces
+INDENT_2 = '      ' # 6 spaces
+
+# Methods:
 
 """
 <TODO>
-figure this out:
-    import argparse
-
-    parse = argparse.ArgumentParser(description='Finds all TODO\'s in
-            a folder and outputs them to stdout')
-    parse.add_argument('')
+make proper exceptions
 </TODO>
 """
 
-# Defines:
-START_TODO_DELIM = '<TODO>'
-STOP_TODO_DELIM = '</TODO>'
-SPACE_TAB = '    '
-INDENT_1 = '    '
-INDENT_2 = '      '
-
-# Methods:
-def todofinder(filename):
+def main():
     """
-    Finds and displays TODOs in a file
+    Main method
 
     Params:
-        filename -> The file to find TODOs
+        None
 
     Returns:
         None
     """
 
-    # with keyword handles opening and closing file
-    print(filename)
-    with open(filename, 'r') as file:
-        text = file.read()
+    # argparse
+    parser = argparse.ArgumentParser(prog='Todofinder',
+                                     description='Finds and outputs TODOs in file.')
 
-    # Gives error
-    if text.count(START_TODO_DELIM) != text.count(STOP_TODO_DELIM):
-        print(INDENT_1 + '!!! ERROR !!! TODO flags do not match!')
-        print()
-        return
+    parser.add_argument('filename',
+                        nargs='+',
+                        help='name of file(s)/dir(s)')
 
-    # Convert all tabs to spaces
-    text = text.expandtabs(tabsize=len(SPACE_TAB))
+    parser.add_argument('-r', '--recursive',
+                        action='store_true',
+                        default=False,
+                        help='recurse into folders')
+    parser.add_argument('-x', '--exclude',
+                        nargs='+',
+                        help='excludes file(s)/dir(s)')
+    parser.add_argument('-s', '--follow-links',
+                        action='store_true',
+                        default=False,
+                        help='follow symlinks')
+    parser.add_argument('-v', '--version',
+                        action='version',
+                        version='%(prog)s {0}'.format(VERSION),
+                        help='prints version information')
+
+    args = parser.parse_args()
+
+    for file_or_dir in args.filename:
+        find_files(file_or_dir, args.exclude, args.recursive, args.follow_links)
+
+def todofinder(f):
+    """
+    Finds and displays TODOs in a file
+
+    Params:
+        f -> The file to find TODOs
+
+    Returns:
+        None
+    """
+
+    print(f.name)
 
     # Counts line numbers and finds out how many
     # columns the line number takes up
+    # Also counts number of start-TODOs and stop-TODOs
     line_num = 1
-    for line in text.splitlines():
+    start_todo = 0
+    stop_todo = 0
+    for line in f.readlines():
+        if START_TODO_DELIM in line:
+            start_todo += 1
+        if STOP_TODO_DELIM in line:
+            stop_todo += 1
+
         line_num += 1
     cols = len(str(line_num))
+
+    # <TODO>
+    # Gives error and returns if there are different
+    # number of start-TODO and stop-TODO
+    if start_todo != stop_todo:
+        print(INDENT_1 + '!!! ERROR !!! Unmatched TODOs')
+        print()
+        return
+    # </TODO>
+
+    # Bring file back to beginning
+    f.seek(0)
 
     # Goes line-by-line and sees if there are
     # any TODOs in that line
     line_num = 1
     todo_num = 0
     in_todo = False
-    for line in text.splitlines():
+    for line in f.readlines():
+        # Convert tabs to spaces (easier to deal with)
+        line = line.expandtabs(tabsize=len(SPACE_TAB))
+
         # Inline TODO
         if START_TODO_DELIM in line and STOP_TODO_DELIM in line:
             todo_num += 1
@@ -125,7 +180,7 @@ def todofinder(filename):
             initial_tabs = count_tabs(line)
 
             start = line.find(START_TODO_DELIM) + len(START_TODO_DELIM)
-            stop = len(line)
+            stop = len(line) - 1
 
             print(INDENT_1 + 'TODO{0}'.format(todo_num))
             # True if there is text after the TODO flag
@@ -153,12 +208,95 @@ def todofinder(filename):
                 line_tabs = count_tabs(line)
 
                 start = find_start(initial_tabs, line_tabs)
-                stop = len(line)
+                stop = len(line) - 1
 
                 print_line_nums(cols, line_num)
                 print(line[start:stop])
 
         line_num += 1
+
+    # Newline if there are no todos
+    # Makes things look pretty
+    if todo_num == 0:
+        print(INDENT_1 + 'None')
+        print()
+
+def find_files(file_or_dir, excludes, recursive, followlinks):
+    """
+    Performs file testing and optional recursion
+
+    Params:
+        file_or_dir -> File/directory to test
+        recursive -> User-specified flag to recurse into directories
+        followlinks -> User-specified flag to follow symlinks
+
+    Returns:
+        None
+    """
+
+    # Return if current file_or_dir is in the list of excludes
+    # No reason to continue further
+    if excludes is not None:
+        if file_or_dir in excludes:
+            return
+
+    #<TODO>
+    # Gives error when file/dir doesn't exist
+    # Also gives an error if file is a broken symlink
+    if os.path.exists(file_or_dir) is False:
+        print('!!! ERROR !!! \'{0}\' is not a file/directory'.format(file_or_dir)
+              + ' or is a broken symlink')
+        print()
+        return
+    #</TODO>
+
+    # No point of checking file if it's a symlink and
+    # followlinks is off
+    # However, it will continue to check other files/dirs
+    # Thus, no error
+    if os.path.islink(file_or_dir) and followlinks is False:
+        print('\'{0}\' is a symlink'.format(file_or_dir))
+        print()
+        return
+
+    # If no excludes, makes it equal to the empty set
+    # Prevents errors later on, since set() cannot iterate
+    # over None
+    if excludes is None:
+        excludes = set()
+
+    # Goes (walks) into directory and reads directories and files
+    if os.path.isdir(file_or_dir):
+        # Automatically recurses into folders (elements in subdirs)
+        for root, subdirs, files in os.walk(file_or_dir, followlinks=followlinks):
+            # Creates set of files/dirs that are in subdirs and in excludes
+            exclude_dirs = set(excludes) & set(subdirs)
+            exclude_files = set(excludes) & set(files)
+
+            # If not recursive, set of excludes is all subdirs
+            # That is, do not enter any subdirectories
+            if recursive is False:
+                exclude_dirs = set(subdirs)
+
+            # Removes directories from recursion list
+            if exclude_dirs is not set():
+                for directory in exclude_dirs:
+                    subdirs.remove(directory)
+
+            # Removes files from checking list
+            if exclude_files is not set():
+                for f in exclude_files:
+                    files.remove(f)
+
+            # Call todofinder() on left over files
+            for filename in files:
+                with open(os.path.join(root, filename), 'r') as f:
+                    todofinder(f)
+
+    #Reads file
+    elif os.path.isfile(file_or_dir):
+        with open(file_or_dir, 'r') as f:
+            todofinder(f)
 
 def find_start(initial_tabs, line_tabs):
     """
@@ -174,16 +312,21 @@ def find_start(initial_tabs, line_tabs):
     """
 
     if line_tabs < initial_tabs:
+        # Case:
+        #       <TODO>...
+        #   </TODO>
+        # You shouldn't be doing this anyway!
+
         # Start from the first non-tab character
         # This will cause the indentation to be off,
         # but the TODO text is still readable
         start = line_tabs * len(SPACE_TAB)
+
     else:
         # Start relative to the TODO flag
         start = initial_tabs * len(SPACE_TAB)
 
     return start
-
 
 def count_tabs(line):
     """
@@ -233,8 +376,6 @@ def print_line_nums(cols, line_num):
         print('0', end='')
     print('{0} '.format(line_num), end='')
 
-# Test files:
-todofinder('./tests/testfile')
-todofinder('./tests/testfile2')
-todofinder('./tests/testfile3')
-todofinder('./tests/testfile4')
+# Execute code
+if __name__ == '__main__':
+    main()
