@@ -17,7 +17,6 @@ or
 ##Input
 Program takes in a list of files/folders with arguments. Help argument is `-h` or `--help`.
 
-###Example
 ```
 todofinder.py [option(s)] file(s)/folder(s)
 ```

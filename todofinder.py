@@ -64,6 +64,8 @@ INDENT_2 = '      ' # 6 spaces
 """
 <TODO>
 make proper exceptions
+make todofinder.py * -r -x *.exe work correctly
+    globbing?
 </TODO>
 """
 
@@ -241,6 +243,12 @@ def find_files(file_or_dir, excludes, recursive, followlinks):
         if file_or_dir in excludes:
             return
 
+    # If no excludes, makes it equal to the empty set
+    # Prevents errors later on, since set() cannot iterate
+    # over None
+    else:
+        excludes = set()
+
     #<TODO>
     # Gives error when file/dir doesn't exist
     # Also gives an error if file is a broken symlink
@@ -260,24 +268,20 @@ def find_files(file_or_dir, excludes, recursive, followlinks):
         print()
         return
 
-    # If no excludes, makes it equal to the empty set
-    # Prevents errors later on, since set() cannot iterate
-    # over None
-    if excludes is None:
-        excludes = set()
-
     # Goes (walks) into directory and reads directories and files
     if os.path.isdir(file_or_dir):
         # Automatically recurses into folders (elements in subdirs)
         for root, subdirs, files in os.walk(file_or_dir, followlinks=followlinks):
-            # Creates set of files/dirs that are in subdirs and in excludes
-            exclude_dirs = set(excludes) & set(subdirs)
-            exclude_files = set(excludes) & set(files)
-
             # If not recursive, set of excludes is all subdirs
             # That is, do not enter any subdirectories
             if recursive is False:
                 exclude_dirs = set(subdirs)
+
+            else:
+                exclude_dirs = set(excludes) & set(subdirs)
+
+            # Creates set of files/dirs that are in subdirs and in excludes
+            exclude_files = set(excludes) & set(files)
 
             # Removes directories from recursion list
             if exclude_dirs is not set():
