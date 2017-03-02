@@ -1,10 +1,9 @@
 #todofinder
-Recurses in folder and finds all the different TODO's in a file and outputs every TODO to stdout. If there is a file named 'TODO.txt' in the folder, then it will output that file's contents as well. 
+Recurses in folder and finds all the different todo's in a file and outputs every todo to stdout. If there is a file named 'TODO.txt' or 'todo.txt' as the input, then it will output that file's contents. 
 
 ##Operation
-Put HTML-like TODO flags around code, bullet points, etc.
+Put HTML-like todo flags around code, bullet points, etc.
 
-###Example
 ```
 <TODO>
 [...]
@@ -15,11 +14,33 @@ or
 <TODO>[...]</TODO>
 ```
 
+##Input
+Program takes in a list of files/folders with arguments. Help argument is `-h` or `--help`.
+
+###Example
+```
+todofinder.py [option(s)] file(s)/folder(s)
+```
+
+##Output
+All text between the todo flags will be output to stdout with line numbers.
+
+###Example
+```
+filename: file.txt
+23 <TODO>Todo Text</TODO>
+```
+At stdout:
+```
+file.txt
+	TODO1
+	  23 Todo Text
+	END1
+```
+
 ##Todo
 (heh)
 <ul>
-<li>CLI with arg module</li>
-<li>Recurse ability</li>
-<li>Output TODO.txt</li>
+<li>Find TODO.txt/todo.txt and output all text</li>
+<li>Add exceptions</li>
 </ul>
-
