@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """
 MIT License
 
@@ -50,7 +51,7 @@ import argparse # For CLI arguments
 import os # For file/directory operations
 
 # Defines:
-VERSION = '1.0.0' # [major].[minor].[patch]
+VERSION = '1.0.1' # [major].[minor].[patch]
 
 START_TODO_DELIM = '<TODO>' # Start-todo delimiter
 STOP_TODO_DELIM = '</TODO>' # Stop-todo delimiter
