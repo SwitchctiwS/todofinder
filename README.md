@@ -1,7 +1,7 @@
-#todofinder
+# todofinder
 Recurses in folder and finds all the different todo's in a file and outputs every todo to stdout. If there is a file named 'TODO.txt' or 'todo.txt' as the input, then it will output that file's contents. 
 
-##Operation
+## Operation
 Put HTML-like todo flags around code, bullet points, etc.
 
 ```
@@ -14,17 +14,17 @@ or
 <TODO>[...]</TODO>
 ```
 
-##Input
+## Input
 Program takes in a list of files/folders with arguments. Help argument is `-h` or `--help`.
 
 ```
 todofinder.py [option(s)] file(s)/folder(s)
 ```
 
-##Output
+## Output
 All text between the todo flags will be output to stdout with line numbers.
 
-###Example
+### Example
 ```
 filename: file.txt
 23 <TODO>Todo Text</TODO>
@@ -37,7 +37,7 @@ file.txt
 	END1
 ```
 
-##Todo
+## Todo
 (heh)
 <ul>
 <li>Find TODO.txt/todo.txt and output all text</li>

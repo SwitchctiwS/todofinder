@@ -51,7 +51,7 @@ import argparse # For CLI arguments
 import os # For file/directory operations
 
 # Defines:
-VERSION = '1.0.1' # [major].[minor].[patch]
+VERSION = '1.1.0' # [major].[minor].[patch]
 
 START_TODO_DELIM = '<TODO>' # Start-todo delimiter
 STOP_TODO_DELIM = '</TODO>' # Stop-todo delimiter
@@ -65,7 +65,8 @@ INDENT_2 = '      ' # 6 spaces
 <TODO>
 make proper exceptions
 make todofinder.py * -r -x *.exe work correctly
-    globbing?
+    globbing
+it would be easy to expand it to all types of flags, not just todos
 </TODO>
 """
 
@@ -95,6 +96,13 @@ def main():
     parser.add_argument('-x', '--exclude',
                         nargs='+',
                         help='excludes file(s)/dir(s)')
+    """
+    <TODO>
+    parser.add_argument('-m', '--method',
+                        nargs='+',
+                        help='which flags to display')
+    </TODO>
+    """
     parser.add_argument('-s', '--follow-links',
                         action='store_true',
                         default=False,
